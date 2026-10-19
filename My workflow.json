@@ -1,0 +1,203 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi there! 👋\nMy name is Data Analyst Agent. How can I assist you today?",
+        "options": {
+          "inputPlaceholder": "Type your question..",
+          "responseMode": "lastNode"
+        }
+      },
+      "id": "6f5b598e-cbb0-4f6d-8f91-a7dd4181789d",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "d66a8f98-8f14-46d2-a701-6c0f4b486921"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a friendly, expert Data Analyst assistant.\n\nTools:\n- \"Get row(s) in sheet in Google Sheets\": reads rows from the customer Google Sheet. Use it whenever the user asks about the data (counts, unique values, summaries, reports).\n- \"Send a message in Gmail\": sends an email. Use it only when the user asks to email or send the result.\n\nHow to work:\n1. Load the data with the Google Sheets tool before answering any data question. Never invent numbers.\n2. Do the analysis requested (e.g. count unique customers per city), checking column names in the data first.\n3. Present results clearly, using a short summary followed by a table or list.\n4. If the user asks for the analysis by email, send it with the Gmail tool using a clear subject and a well-formatted plain-text body containing the results.\n5. If the request is unclear, ask a short clarifying question."
+        }
+      },
+      "id": "cdf0674a-0f11-44e5-ba6b-8f4ed335e5b2",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "f1fcbe3e-301e-4cfd-b687-fdb44f4bc765",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        48,
+        176
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "id": "c4fc217f-7a0f-4e49-bcff-b0a968c1d847",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        192,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/19mepFG80jj4omCbdRXUbA4i0oTj8_kLD-2PSRdgXBfE/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19mepFG80jj4omCbdRXUbA4i0oTj8_kLD-2PSRdgXBfE/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "d787fd43-7f2c-42db-a251-97a43a14bc16",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        400,
+        208
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "OXV4mbRQ1RWmWQs9",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "yadavaakash6849@gmail.com",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "08ebbf07-fdca-4cf6-a06b-5612a59ce169",
+      "name": "Send a message in Gmail",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        528,
+        192
+      ],
+      "webhookId": "156b3f92-6add-47a6-a7ed-77838131c0bc",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "DBCW5wW8fkwMis1N",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6878a23c-ff91-42eb-9ae3-42d47dffe1f1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cb2a548111dfb1a2ab5a2f4f50e3995682300944f1f183ab7a8f06283d1512bc"
+  },
+  "nodeGroups": [],
+  "id": "H5IY0GMNpc2t3lOu",
+  "tags": []
+}
